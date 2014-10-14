@@ -477,7 +477,7 @@ OpenStack Icehouse 两节点内外网设置
  
  图案:-)表示已正常
 
-检查可用镜像
+检查可用镜像::
 
  source creds
  nova image-list
