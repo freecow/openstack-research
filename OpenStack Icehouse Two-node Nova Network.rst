@@ -474,8 +474,8 @@ OpenStack Icehouse 两节点内外网设置
 检查Nova服务是否已正常运行::
 
  nova-manage service list
-
-图案**:-)**表示已正常
+ 
+ 图案:-)表示已正常
 
 检查可用镜像
 
@@ -531,7 +531,7 @@ OpenStack Icehouse 两节点内外网设置
  service apache2 restart; service memcached restart
 
 
-测试：打开http://172.16.10.51/horizon 登录admin/admin_pass
+测试：打开http://172.16.10.51/horizon，登录admin/admin_pass
 
 
 安装计算节点
@@ -558,6 +558,7 @@ OpenStack Icehouse 两节点内外网设置
 安装kvm软件包::
 
  apt-get install -y kvm libvirt-bin pm-utils
+ 
  如果不支持kvm，需再安装如下：
  apt-get install -y qemu-kvm 
 
@@ -667,8 +668,9 @@ OpenStack Icehouse 两节点内外网设置
 检查Nova服务是否已正常运行::
 
  nova-manage service list
+ 
+ 图案:-)表示已正常
 
-图案**:-)**表示已正常
 
 
 配置网络
@@ -683,12 +685,12 @@ OpenStack Icehouse 两节点内外网设置
 
  nova-manage floating create --pool=nova --ip_range=172.16.10.24/29
  nova-manage floating list
- nova floating-ip-associate 实例名 172.16.10.25（或者通过管理页面给实例分配浮动ip）
 
 
 修改default访问控制策略（也可通过管理页面）::
 
  #允许ICMP
  nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
+ 
  #允许SSH访问
  nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
