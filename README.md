@@ -5,7 +5,7 @@ OpenStack-Research
 
 目前包括以下几个文档：
 
-* OpenStack Icehouse Two-node Nova Network.rst 在两台主机上基于Nova Network实现IceHouse架构
+* [OpenStack Icehouse Two-node Nova Network.rst](https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-Icehouse-Twonode-Nova-Network.rst) 在两台主机上基于Nova Network实现IceHouse架构
 
 * OpenStack Q&A.rst  安装及运行过程中的问题及解决方案
 

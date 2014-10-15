@@ -63,7 +63,10 @@ OpenStack Icehouse 两节点内外网设置
  
  ifdown eth0 && ifup eth0
  ifdown eth1 && ifup eth1
- 
+
+ 如果无法生效，可以执行重启
+ reboot
+
 配置计算节点
 ------------
 
@@ -149,9 +152,12 @@ OpenStack Icehouse 两节点内外网设置
  vi /etc/mysql/my.cnf
  
  [mysqld]
+ #修改默认存储方式
  default-storage-engine = innodb
  innodb_file_per_table
+ #修改默认校对规则
  collation-server = utf8_general_ci
+ #修改初始化连接规则
  init-connect = 'SET NAMES utf8'
  character-set-server = utf8
 
@@ -203,9 +209,17 @@ OpenStack Icehouse 两节点内外网设置
  connection = mysql://keystone:KEYSTONE_DBPASS@controller/keystone
  
  [DEFAULT]
+ #证书连接方式
  admin_token=ADMIN
  log_dir=/var/log/keystone
 
+可通过以下命令检查文件修改了哪些部分
+
+ grep '[^a-z]' /etc/keystone/keystone.conf
+
+可通过以下命令检查文件中对应的键值
+ 
+ grep "admin_token" /etc/keystone/keystone.conf
 
 重启Keystone服务并同步数据库::
 
@@ -270,6 +284,7 @@ OpenStack Icehouse 两节点内外网设置
 
  unset OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
  
+ #证书连接方式与用户名变量设置方式有冲突，因此需要清楚上述变量
  keystone --os-username=admin --os-password=admin_pass --os-auth-url=http://controller:35357/v2.0 token-get
 
  source admin_creds
@@ -388,7 +403,8 @@ OpenStack Icehouse 两节点内外网设置
 列出镜像::
 
  glance image-list
-
+ 
+ 形成的镜像文件缺省存入/var/lib/glance/image目录下，可通过file <文件名>的查看其格式信息
 
 安装Nova计算服务
 ---------------
@@ -397,7 +413,13 @@ OpenStack Icehouse 两节点内外网设置
 
  apt-get install -y nova-api nova-cert nova-conductor nova-consoleauth \
  nova-novncproxy nova-scheduler python-novaclient
-
+ 
+ nova-api为底层api接口
+ nove-cert为认证服务
+ nova-conductor为数据库中间层服务
+ nova-consoleauth为控制台认证服务
+ nova-novncproxy为控制台vnc服务
+ nova-scheduler为调度服务
 
 创建与Nova相关的数据库::
 
@@ -509,8 +531,8 @@ OpenStack Icehouse 两节点内外网设置
 安装所需软件包::
 
  apt-get install -y apache2 memcached libapache2-mod-wsgi openstack-dashboard
-
-如果apache2启动报错，可修改/etc/apache2/apache2.conf，在最后一行添加ServerName localhost
+ 
+ 如果apache2启动报错，可修改/etc/apache2/apache2.conf，在最后一行添加ServerName localhost
 
 
 删除openstack-dashboard-ubuntu-theme::
@@ -635,14 +657,20 @@ OpenStack Icehouse 两节点内外网设置
  security_group_api = nova
  network_size = 254
  allow_same_net_traffic = False
+ #打开多主机模式，每个计算节点必须启动api-metadata、network和compute服务
  multi_host = True
  send_arp_for_ha = True
  share_dhcp_address = True
+ #删除虚机时将ip立即释放
  force_dhcp_release = True
  firewall_driver = nova.virt.libvirt.firewall.IptablesFirewallDriver
+ #网络模式有flat、flatdhcp、vlan等，本实验采用flatdhcp模式
  network_manager = nova.network.manager.FlatDHCPManager
+ #使用br100连接虚机
  flat_network_bridge = br100
+ #虚机之间的通信接口，会被自动加入到br100中
  flat_interface = eth0
+ #公用接口，浮动ip配置在该接口
  public_interface = br100
 
 
@@ -650,6 +678,7 @@ OpenStack Icehouse 两节点内外网设置
 
  vi  /etc/sysctl.conf
  
+ #打开路径转发
  net.ipv4.ip_forward=1
 
 
