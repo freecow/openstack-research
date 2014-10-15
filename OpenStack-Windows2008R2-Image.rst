@@ -37,7 +37,7 @@ OpenStack安装Windows2008R2镜像
 
 适用于iso文件存于已格式化为VMFS卷的存储上
 
-连接iSCSI存储，挂载至/nas目录（参见Ubuntu iSCSI Config）
+连接iSCSI存储，挂载至/nas目录（参见 `OpenStack QA <https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-QA.rst>`_ 中关于iSCSI连接VMWare部分）
 
 拷贝iso文件至home目录::
 

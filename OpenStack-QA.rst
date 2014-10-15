@@ -54,3 +54,65 @@ endpoint-id换成keystone endpoint-list执行结果中，显示的错误对应id
  exit
 
 XXXX换成nova-manager service list中，对应的错误主机名称主机名称
+
+
+在ESXi5.5的Ubuntu虚机中执行kvm-ok，显示不支持
+++++++++++++++++++++++++++++++++++++++++++
+
+**分析：** 
+在 VMware ESXi 虚拟机上运行虚拟机，被称为多层虚拟或者嵌套虚拟机（Nested VMs）。如果机器缺乏但需要测试 OpenStack，使用 VMware ESXi 虚拟几个运行 KVM Hypervisor 的 OpenStack 计算节点是个不错的办法。 但默认情况下不支持嵌套虚拟，执行kvm-ok会报出以下信息::
+
+ kvm-ok 
+ 
+ INFO: Your CPU does not support KVM extensions
+ KVM acceleration can NOT be used
+
+**解决步骤：**
+
+1.编辑对应虚拟机的选项（需要先关闭虚拟机），打开编辑设置对话框，在选项页面的常规选项里把客户机操作系统的类型换成其他里面的 VMware ESxi 5.x
+
+2.到ESXi的主机数据存储中，找到对应虚拟机的文件夹，将虚机的vmx文件下载出来，vmx文件名一般对应虚机的名字，编辑此文件，在最后加入一行vhv.enable = "true"，保存后再将其传回ESXi原目录中
+
+
+如何在Ubuntu中挂载和卸载外部iSCSI存储的VMWARE卷
+++++++++++++++++++++++++++++++
+
+**解决步骤：**
+
+安装iSCSI客户端::
+
+ apt-get install open-iscsi 
+
+
+查找外部存储ip地址的target::
+
+ iscsiadm -m discovery -t sendtargets -p 172.16.10.33:3260
+ 
+ 172.16.10.34:3260,1 iqn.2004-04.com.qnap:ts-569l:iscsi.lunll.d78468
+ 172.16.10.33:3260,1 iqn.2004-04.com.qnap:ts-569l:iscsi.lunll.d78468
+ 172.16.10.34:3260,1 iqn.2004-04.com.qnap:ts-569l:iscsi.lunsoftware.d78468
+ 172.16.10.33:3260,1 iqn.2004-04.com.qnap:ts-569l:iscsi.lunsoftware.d78468
+
+
+得到所需的target名称后建立连接::
+
+ iscsiadm --mode node --targetname iqn.2004-04.com.qnap:ts-569l:iscsi.lunsoftware.d78468 --portal 172.16.10.33:3260 --login
+
+
+通过fdisk -l列出设备名称(如：/dev/sdb1)，并挂载到目录(如：/nas)::
+
+ mkdir /nas
+ apt-get install vmfs-tools
+ vmfs-fuse /dev/sdb1 /nas
+ 
+ 注：vmfs卷挂载后是只读的（需要什么可以用cp命令拷出来）
+
+
+如需设置开机自动登录到iscsi-target::
+
+ iscsiadm -m node -T iqn.2004-04.com.qnap:ts-569l:iscsi.lunsoftware.d78468 --port 172.16.10.33:3260 --op update -n node.startup -v automatic
+
+
+如需卸载该卷::
+
+ iscsiadm --mode node --targetname iqn.2004-04.com.qnap:ts-569l:iscsi.lunsoftware.d78468 --portal 172.16.10.33:3260 --logout
