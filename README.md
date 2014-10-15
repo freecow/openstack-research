@@ -9,4 +9,4 @@ OpenStack-Research
 
 * OpenStack Q&A.rst  安装及运行过程中的问题及解决方案
 
-* OpenStack Windows2008R2 Image.rat 如何在已架构的OpenStack基础上创建Windows 2008 R2实例
+* OpenStack Windows2008R2 Image.rst 如何在已架构的OpenStack基础上创建Windows 2008 R2实例
