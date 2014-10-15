@@ -726,6 +726,6 @@ OpenStack Icehouse 两节点内外网设置
  nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
 
 
-如需建立Windows 2008R2实例，可参考文档`OpenStack-Windows2008R2-Image <https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-Windows2008R2-Image.rst>`_.
+如需建立Windows 2008R2实例，可参考文档 `OpenStack-Windows2008R2-Image <https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-Windows2008R2-Image.rst>`_
 
-如需解决安装和运行中碰到的问题，可参考文档`OpenStack-QA <https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-QA.rst>`_.
+如需解决安装和运行中碰到的问题，可参考文档 `OpenStack-QA <https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-QA.rst>`_
