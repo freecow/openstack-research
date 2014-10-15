@@ -213,11 +213,11 @@ OpenStack Icehouse 两节点内外网设置
  admin_token=ADMIN
  log_dir=/var/log/keystone
 
-可通过以下命令检查文件修改了哪些部分
+可通过以下命令检查文件修改了哪些部分::
 
  grep '[^a-z]' /etc/keystone/keystone.conf
 
-可通过以下命令检查文件中对应的键值
+可通过以下命令检查文件中对应的键值::
  
  grep "admin_token" /etc/keystone/keystone.conf
 
@@ -284,7 +284,7 @@ OpenStack Icehouse 两节点内外网设置
 
  unset OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
  
- #证书连接方式与用户名变量设置方式有冲突，因此需要清楚上述变量
+ #证书连接方式与用户名变量设置方式有冲突，因此需要清除上述变量
  keystone --os-username=admin --os-password=admin_pass --os-auth-url=http://controller:35357/v2.0 token-get
 
  source admin_creds
@@ -315,7 +315,7 @@ OpenStack Icehouse 两节点内外网设置
 
 配置Service用户及角色::
 
- keystone user-create --name=glance --pass=service_pass --email=glance@domain.com
+ keystone user-create --name=glance --pass=service_pass --email=glance@geniuslab.local
  keystone user-role-add --user=glance --tenant=service --role=admin
 
 
@@ -404,7 +404,7 @@ OpenStack Icehouse 两节点内外网设置
 
  glance image-list
  
- 形成的镜像文件缺省存入/var/lib/glance/image目录下，可通过file <文件名>的查看其格式信息
+ 形成的镜像文件缺省存入/var/lib/glance/image目录下，可通过file <文件名>命令查看其格式信息
 
 安装Nova计算服务
 ---------------
@@ -414,6 +414,7 @@ OpenStack Icehouse 两节点内外网设置
  apt-get install -y nova-api nova-cert nova-conductor nova-consoleauth \
  nova-novncproxy nova-scheduler python-novaclient
  
+ 注：
  nova-api为底层api接口
  nove-cert为认证服务
  nova-conductor为数据库中间层服务
@@ -553,7 +554,7 @@ OpenStack Icehouse 两节点内外网设置
  service apache2 restart; service memcached restart
 
 
-测试：打开http://172.16.10.51/horizon，登录admin/admin_pass
+测试：打开 http://172.16.10.51/horizon 登录admin/admin_pass
 
 
 安装计算节点
@@ -723,3 +724,8 @@ OpenStack Icehouse 两节点内外网设置
  
  #允许SSH访问
  nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
+
+
+如需建立Windows 2008R2实例，可参考文档`OpenStack-Windows2008R2-Image <https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-Windows2008R2-Image.rst>`_.
+
+如需解决安装和运行中碰到的问题，可参考文档`OpenStack-QA <https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-QA.rst>`_.

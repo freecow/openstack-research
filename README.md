@@ -7,6 +7,6 @@ OpenStack-Research
 
 * [OpenStack Icehouse Two-node Nova Network.rst](https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-Icehouse-Twonode-Nova-Network.rst) 在两台主机上基于Nova Network实现IceHouse架构
 
-* OpenStack Q&A.rst  安装及运行过程中的问题及解决方案
+* [OpenStack Q&A.rst](https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-QA.rst)  安装及运行过程中的问题及解决方案
 
-* OpenStack Windows2008R2 Image.rst 如何在已架构的OpenStack基础上创建Windows 2008 R2实例
+* [OpenStack Windows2008R2 Image.rst](https://github.com/freecow/OpenStack-Research/blob/master/OpenStack-Windows2008R2-Image.rst) 如何在已架构的OpenStack基础上创建Windows 2008 R2实例
