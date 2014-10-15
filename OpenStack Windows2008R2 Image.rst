@@ -2,11 +2,23 @@
 OpenStack安装Windows2008R2镜像
 ==============================
 
+本文简单介绍了在已搭建好的Openstack基础上如何创建 **Windows 2008R2** 实例。
+
+文档以OpenStack官方手册为最终参考依据。
+
+:Version: 1.0
+:Authors: Zhang Hui
+:License: Apache License Version 2.0
+:Keywords: OpenStack, IceHouse, Ubuntu
+
+===========================================
+
+
 上传windows2008的安装iso文件至compute节点
 ----------------------------------------
 
 方法一：通过FTP方式
-~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++
 
 安装vsftpd服务器::
 
@@ -21,7 +33,7 @@ OpenStack安装Windows2008R2镜像
 
 
 方法二：通过iSCSI连接VMFS存储卷
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++
 
 适用于iso文件存于已格式化为VMFS卷的存储上
 
@@ -52,7 +64,7 @@ OpenStack安装Windows2008R2镜像
  qemu-system-x86_64 --enable-kvm -m 2048 -boot d -drive file=win2008r2.img, if=virtio -cdrom win2008r2.iso -drive file=virtio-win-drivers-20120712-1.iso, media=cdrom -net nic, model=virtio -net user -nographic -vnc :1
 
 
-vnc客户端后续安装
+VNC客户端后续安装
 -----------------
 
 1. 通过vnc客户端连接172.16.10.52:5901
@@ -70,8 +82,8 @@ vnc客户端后续安装
 **注：** 如vnc客户端连接闪退，则需修改vnc客户端options→expert→colorlevel，改为rgb222
 
 
-上传Glance
------------
+上传Glance镜像
+--------------
 
 将镜像文件回传至controller::
 
@@ -91,5 +103,5 @@ glance上传镜像::
 1. 登录dashboard，创建相应镜像的实例
 2. 到实例管理界面，分配浮动地址给实例
 3. 切换到实例的novnc画面，由于系统进行过sysprep的封装，需要进行几个初始化配置
-4. 修改default访问规则，添加TCP 3389
+4. 修改default访问规则，添加TCP 3389，便于远程桌面访问
 5. 配置完毕后，可通过远程桌面可以访问该浮动地址
