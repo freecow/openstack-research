@@ -116,3 +116,29 @@ XXXX换成nova-manager service list中，对应的错误主机名称主机名称
 如需卸载该卷::
 
  iscsiadm --mode node --targetname iqn.2004-04.com.qnap:ts-569l:iscsi.lunsoftware.d78468 --portal 172.16.10.33:3260 --logout
+
+
+如何在VMWare WorkStation中配置OpenStack网络测试环境
+++++++++++++++++++++++++++++++++++++++++++
+
+**解决步骤：**
+
+1.在VMWare WorkStation中点击编辑→虚拟网络编辑器，修改VMnet1（仅主机模式）的子网IP为10.0.0.0，掩码为255.255.255.0，修改VMnet8（NAT模式）的子网为192.168.10.0，掩码为255.255.255.0，检查本机的网卡IP地址，会发现VMnet1的地址变为10.0.0.1，VMnet8的地址变为192.168.10.1
+
+2.安装好Ubuntu后，修改相应的网卡ip地址
+
+ vi /etc/network/interfaces
+ 
+ auto eth0
+ iface eth0 inet static
+ address 192.168.10.51
+ netmask 255.255.255.0
+ gateway 192.168.10.2
+ dns-nameservers 192.168.10.2
+ 
+ auto eth1
+ iface eth0 inet static
+ address 10.0.0.51
+ netmask 255.255.255.0
+
+3.如果希望从虚机中ping通主机，则需要关闭主机Windows的防火墙或者添加允许入站ICMPv4的规则
