@@ -125,7 +125,7 @@ XXXX换成nova-manager service list中，对应的错误主机名称主机名称
 
 1.在VMWare WorkStation中点击编辑→虚拟网络编辑器，修改VMnet1（仅主机模式）的子网IP为10.0.0.0，掩码为255.255.255.0，修改VMnet8（NAT模式）的子网为192.168.10.0，掩码为255.255.255.0，检查本机的网卡IP地址，会发现VMnet1的地址变为10.0.0.1，VMnet8的地址变为192.168.10.1
 
-2.安装好Ubuntu后，修改相应的网卡ip地址
+2.安装好Ubuntu后，修改相应的网卡ip地址::
 
  vi /etc/network/interfaces
  
@@ -142,3 +142,222 @@ XXXX换成nova-manager service list中，对应的错误主机名称主机名称
  netmask 255.255.255.0
 
 3.如果希望从虚机中ping通主机，则需要关闭主机Windows的防火墙或者添加允许入站ICMPv4的规则
+
+
+如何扩展Ubuntu的LVM分区
++++++++++++++++++++++++++++++
+
+**解决步骤：**
+
+1.查看系统挂载情况::
+
+ df -h
+ 
+ Filesystem                       Size  Used Avail Use% Mounted on
+ /dev/mapper/controller--vg-root   19G  2.2G   16G  13% /
+ none                             4.0K     0  4.0K   0% /sys/fs/cgroup
+ udev                             987M  4.0K  987M   1% /dev
+ tmpfs                            200M  616K  199M   1% /run
+ none                             5.0M     0  5.0M   0% /run/lock
+ none                             998M     0  998M   0% /run/shm
+ none                             100M     0  100M   0% /run/user
+ /dev/sda1                        236M   66M  158M  30% /boot
+
+系统有一个236M的boot分区和一个19G的vg分区，我们准备扩容vg分区
+
+2.查看系统分区情况::
+
+ fdisk -l
+ 
+ Disk /dev/sda: 85.9 GB, 85899345920 bytes
+ 255 heads, 63 sectors/track, 10443 cylinders, total 167772160 sectors
+ Units = sectors of 1 * 512 = 512 bytes
+ Sector size (logical/physical): 512 bytes / 512 bytes
+ I/O size (minimum/optimal): 512 bytes / 512 bytes
+ Disk identifier: 0x000067e4
+    Device Boot      Start         End      Blocks   Id  System
+ /dev/sda1   *        2048      499711      248832   83  Linux
+ /dev/sda2          501758    41940991    20719617    5  Extended
+ /dev/sda5          501760    41940991    20719616   8e  Linux LVM
+
+很明显/dev/sda已经被扩展到了85.9G，原vg逻辑卷创建在/dev/sda2上，只有19G
+
+3.增加分区::
+
+ fdisk /dev/sda
+ 
+ Command (m for help): n
+ Partition type:
+    p   primary (1 primary, 1 extended, 2 free)
+    l   logical (numbered from 5)
+ Select (default p): p
+ Partition number (1-4, default 3): 
+ Using default value 3
+ First sector (499712-167772159, default 499712): 
+ Using default value 499712
+ Last sector, +sectors or +size{K,M,G} (499712-501757, default 501757): 
+ Using default value 501757
+ Command (m for help): w
+ The partition table has been altered!
+ Calling ioctl() to re-read partition table.
+ Syncing disks.
+
+很奇怪，有些硬盘需要先分一个小的区，不怕，再执行上面的命令继续分区
+
+4.再次增加分区::
+
+ fdisk /dev/sda
+ 
+ Command (m for help): n
+ Partition type:
+    p   primary (2 primary, 1 extended, 1 free)
+    l   logical (numbered from 5)
+ Select (default p): p
+ Selected partition 4
+ First sector (41940992-167772159, default 41940992): 
+ Using default value 41940992
+ Last sector, +sectors or +size{K,M,G} (41940992-167772159, default 167772159): 
+ Using default value 167772159
+ Command (m for help): w
+ The partition table has been altered!
+ Calling ioctl() to re-read partition table.
+ Syncing disks.
+
+这次分到了我们需要的大分区
+
+5.查看分区情况::
+
+ fdisk -l
+ 
+ Disk /dev/sda: 85.9 GB, 85899345920 bytes
+ 255 heads, 63 sectors/track, 10443 cylinders, total 167772160 sectors
+ Units = sectors of 1 * 512 = 512 bytes
+ Sector size (logical/physical): 512 bytes / 512 bytes
+ I/O size (minimum/optimal): 512 bytes / 512 bytes
+ Disk identifier: 0x000067e4
+    Device Boot      Start         End      Blocks   Id  System
+ /dev/sda1   *        2048      499711      248832   83  Linux
+ /dev/sda2          501758    41940991    20719617    5  Extended
+ /dev/sda3          499712      501757        1023   83  Linux
+ /dev/sda4        41940992   167772159    62915584   83  Linux
+ /dev/sda5          501760    41940991    20719616   8e  Linux LVM
+
+很明显，我们需要把vg扩展到/dev/sda4
+
+6.使分区生效::
+
+ partprobe
+
+
+7.找到需要扩展的vg分区::
+
+ vgdisplay
+ 
+ --- Volume group ---
+   VG Name               controller-vg
+   System ID             
+   Format                lvm2
+   Metadata Areas        1
+   Metadata Sequence No  3
+   VG Access             read/write
+   VG Status             resizable
+   MAX LV                0
+   Cur LV                2
+   Open LV               2
+   Max PV                0
+   Cur PV                1
+   Act PV                1
+   VG Size               19.76 GiB
+   PE Size               4.00 MiB
+   Total PE              5058
+   Alloc PE / Size       5053 / 19.74 GiB
+   Free  PE / Size       5 / 20.00 MiB
+   VG UUID               jyqjWB-aW6I-PE9b-HsyQ-iB4n-whxK-nepqOw
+
+我们需要扩展的vg为controller-vg
+
+8.扩展vg分区::
+
+ vgextend controller-vg /dev/sda4
+ 
+   No physical volume label read from /dev/sda4
+   Physical volume "/dev/sda4" successfully created
+   Volume group "controller-vg" successfully extended
+
+
+9.检查扩展情况::
+
+ vgdisplay
+ 
+ --- Volume group ---
+   VG Name               controller-vg
+   System ID             
+   Format                lvm2
+   Metadata Areas        2
+   Metadata Sequence No  4
+   VG Access             read/write
+   VG Status             resizable
+   MAX LV                0
+   Cur LV                2
+   Open LV               2
+   Max PV                0
+   Cur PV                2
+   Act PV                2
+   VG Size               79.76 GiB
+   PE Size               4.00 MiB
+   Total PE              20418
+   Alloc PE / Size       5053 / 19.74 GiB
+   Free  PE / Size       15365 / 60.02 GiB
+   VG UUID               jyqjWB-aW6I-PE9b-HsyQ-iB4n-whxK-nepqOw
+
+显示Free PE/Size还可扩展60.02G
+
+10.找到LV的设备名::
+
+ lvscan
+ 
+ ACTIVE            '/dev/controller-vg/root' [18.74 GiB] inherit
+ ACTIVE            '/dev/controller-vg/swap_1' [1020.00 MiB] inherit
+
+显示设备名为/dev/controller-vg/root
+
+11.扩展LV卷::
+
+ lvextend -L +40G /dev/controller-vg/root
+ 
+ Extending logical volume root to 58.74 GiB
+ Logical volume root successfully resized
+
+先扩40G，不够未来再扩
+
+12.检查LV扩展情况::
+
+ lvscan
+ 
+ ACTIVE            '/dev/controller-vg/root' [58.74 GiB] inherit
+ ACTIVE            '/dev/controller-vg/swap_1' [1020.00 MiB] inherit
+
+
+13.扩大文件系统分区::
+
+ resize2fs /dev/controller-vg/root
+ 
+ resize2fs 1.42.9 (4-Feb-2014)
+ Filesystem at /dev/controller-vg/root is mounted on /; on-line resizing required
+ old_desc_blocks = 2, new_desc_blocks = 4
+ The filesystem on /dev/controller-vg/root is now 15398912 blocks long.
+
+
+14.检查文件系统分区::
+
+ df -h
+ 
+ Filesystem                       Size  Used Avail Use% Mounted on
+ /dev/mapper/controller--vg-root   58G  2.2G   54G   4% /
+ none                             4.0K     0  4.0K   0% /sys/fs/cgroup
+ udev                             987M  4.0K  987M   1% /dev
+ tmpfs                            200M  624K  199M   1% /run
+ none                             5.0M     0  5.0M   0% /run/lock
+ none                             998M     0  998M   0% /run/shm
+ none                             100M     0  100M   0% /run/user
+ /dev/sda1                        236M   66M  158M  30% /boot
