@@ -61,7 +61,7 @@ OpenStack安装Windows2008R2镜像
 
 启动镜像安装::
 
- qemu-system-x86_64 --enable-kvm -m 2048 -boot d -drive file=win2008r2.img, if=virtio -cdrom win2008r2.iso -drive file=virtio-win-drivers-20120712-1.iso, media=cdrom -net nic, model=virtio -net user -nographic -vnc :1
+ qemu-system-x86_64 --enable-kvm -m 2048 -boot d -drive file=win2008r2.img,if=virtio -cdrom win2008r2.iso -drive file=virtio-win-drivers-20120712-1.iso,media=cdrom -net nic,model=virtio -net user -nographic -vnc :1
 
 
 VNC客户端后续安装
